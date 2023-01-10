@@ -66,7 +66,7 @@
                 stop: ["\n"],
             }, {
                 headers: {
-                    'Authorization': 'Bearer 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',
+                    'Authorization': 'Bearer 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',
                     'Content-Type': 'application/json'
                 }
             });
@@ -82,6 +82,7 @@
         movieTitle = await getRandomPopularMovie();
         console.log("the title is ", movieTitle);
         getEmoji(movieTitle);
+        return movieTitle;
     };
 
     function containsWord(str, word) {
@@ -105,7 +106,7 @@
             alert(`Correct!, The actual movie name is ${movieTitle}`);
 
         } else {
-            alert(`Incorrect!, The actual movie name is ${movieTitle}`);
+            alert(`Incorrect! Try again`);
         }
     }
    
