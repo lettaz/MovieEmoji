@@ -1,40 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <title>Random Movie Generator</title>
     <style>
+        body {
+            font-family: sans-serif;
+        }
+        .movie-container {
+            font-size: 50px;
+        }
 
-    body {
-        font-family: sans-serif;
-      }
-      
-      #fetch-button {
-        padding: 10px 20px;
-        background-color: #00b7ff;
-        color: white;
-        border: none;
-        cursor: pointer;
-      }
-      
-      #fetch-button:hover {
-        background-color: #00a0e9;
-      }
+        #fetch-button {
+            padding: 10px 20px;
+            background-color: #00b7ff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #fetch-button:hover {
+            background-color: #00a0e9;
+        }
+
+        
     </style>
-    
-      
-  </head>
-  <body>
+
+
+</head>
+
+<body>
     <h1>Guess the Movie Name</h1>
     <button id="fetch-button">Fetch a random movie</button>
-    <div id="movie-container"></div>
+    <div id="movie-container" class="movie-container"></div>
     <br>
-    <input type="text" placeholder="What is the movie name"/><button>Submit</button>
-    <div id="result"></div>
-  </body>
-   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <form>
+        <label for="input-string">What is the movie name:</label>
+        <input type="text" id="input-string" name="input-string">
+        <button type="button" onclick="compareStrings()">Check</button>
+    </form>
+</body>
 
-   <script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
 
     const movieContainer = document.getElementById('movie-container');
     const fetchButton = document.getElementById('fetch-button');
@@ -42,9 +51,8 @@
     const popularMoviesUrl = `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US&page=1`;
 
     let movieTitle;
-    
+
     async function getEmoji(movieTitle) {
-        
         try {
             const response = await axios.post('https://api.openai.com/v1/completions', {
                 // request body data goes here
@@ -56,39 +64,71 @@
                 frequency_penalty: 0,
                 presence_penalty: 0,
                 stop: ["\n"],
-                }, {
+            }, {
                 headers: {
                     'Authorization': 'Bearer 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',
                     'Content-Type': 'application/json'
                 }
-                });
+            });
             const text = response.data.choices[0].text;
-
             movieContainer.innerHTML = text;
         } catch (error) {
             console.error(error);
         }
     }
 
-    //Calls the function that makes the API Call
-    fetchButton.addEventListener('click', async () => {
+    
+    const logTitle = async () => {
         movieTitle = await getRandomPopularMovie();
         console.log("the title is ", movieTitle);
         getEmoji(movieTitle);
-    });
+    };
+
+    function containsWord(str, word) {
+        return str.indexOf(word) != -1;
+    }
+
+    function compareStrings() {
+        let userString = document.getElementById("input-string").value;
+        let comparisonString = movieTitle;
+        let wordList = userString.split(" ");
+        
+        let found = false;
+        for (let i = 0; i < wordList.length; i++) {
+            if (containsWord(comparisonString, wordList[i])) {
+            found = true;
+            break;
+            }
+        }
+
+        if (found) {
+            alert(`Correct!, The actual movie name is ${movieTitle}`);
+
+        } else {
+            alert(`Incorrect!, The actual movie name is ${movieTitle}`);
+        }
+    }
+   
+    
 
     //Returns a promise of popular movies from the API
     const getRandomPopularMovie = async () => {
-    try {
-        const response = await fetch(popularMoviesUrl);
-        const data = await response.json();
-        const randomIndex = Math.floor(Math.random() * data.results.length);
-        return data.results[randomIndex].title;
-    } catch (error) {
-        console.log('Error fetching popular movies:', error);
+        try {
+            const response = await fetch(popularMoviesUrl);
+            const data = await response.json();
+            const randomIndex = Math.floor(Math.random() * data.results.length);
+            return data.results[randomIndex].title;
+        } catch (error) {
+            console.log('Error fetching popular movies:', error);
+        }
     }
-    }
+    
+    
 
+    //Calls the function that makes the API Call
+    fetchButton.addEventListener('click', logTitle);
+   
 
-   </script>
+</script>
+
 </html>
