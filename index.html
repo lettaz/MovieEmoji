@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Random Movie Generator</title>
+    <style>
+
+    body {
+        font-family: sans-serif;
+      }
+      
+      #fetch-button {
+        padding: 10px 20px;
+        background-color: #00b7ff;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      
+      #fetch-button:hover {
+        background-color: #00a0e9;
+      }
+    </style>
+    
+      
+  </head>
+  <body>
+    <h1>Guess the Movie Name</h1>
+    <button id="fetch-button">Fetch a random movie</button>
+    <div id="movie-container"></div>
+    <br>
+    <input type="text" placeholder="What is the movie name"/><button>Submit</button>
+    <div id="result"></div>
+  </body>
+   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+   <script>
+
+    const movieContainer = document.getElementById('movie-container');
+    const fetchButton = document.getElementById('fetch-button');
+    const apiKey = '94a75b700492abcdca854701aeae74fd';
+    const popularMoviesUrl = `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US&page=1`;
+
+    let movieTitle;
+    
+    async function getEmoji(movieTitle) {
+        
+        try {
+            const response = await axios.post('https://api.openai.com/v1/completions', {
+                // request body data goes here
+                model: "text-davinci-003",
+                prompt: `Convert movie titles into emoji.\n\nBack to the Future: 👨👴🚗🕒 \nBatman: 🤵🦇 \n Transformers: 🚗🤖 \n ${movieTitle}:`,
+                temperature: 0.8,
+                max_tokens: 60,
+                top_p: 1,
+                frequency_penalty: 0,
+                presence_penalty: 0,
+                stop: ["\n"],
+                }, {
+                headers: {
+                    'Authorization': 'Bearer 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',
+                    'Content-Type': 'application/json'
+                }
+                });
+            const text = response.data.choices[0].text;
+
+            movieContainer.innerHTML = text;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    //Calls the function that makes the API Call
+    fetchButton.addEventListener('click', async () => {
+        movieTitle = await getRandomPopularMovie();
+        console.log("the title is ", movieTitle);
+        getEmoji(movieTitle);
+    });
+
+    //Returns a promise of popular movies from the API
+    const getRandomPopularMovie = async () => {
+    try {
+        const response = await fetch(popularMoviesUrl);
+        const data = await response.json();
+        const randomIndex = Math.floor(Math.random() * data.results.length);
+        return data.results[randomIndex].title;
+    } catch (error) {
+        console.log('Error fetching popular movies:', error);
+    }
+    }
+
+
+   </script>
+</html>
